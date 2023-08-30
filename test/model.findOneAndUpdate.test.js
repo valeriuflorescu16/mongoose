@@ -2143,6 +2143,7 @@ describe('model: findOneAndUpdate:', function() {
     assert.equal(doc.info['second.name'], 'Quiz');
     assert.equal(doc.info2['second.name'], 'Quiz');
   });
+
   it('supports the `includeResultMetadata` option (gh-13539)', async function() {
     const testSchema = new mongoose.Schema({
       name: String
@@ -2183,5 +2184,21 @@ describe('model: findOneAndUpdate:', function() {
       ),
       /Cannot set `rawResult` option when `includeResultMetadata` is false/
     );
+  });
+
+  it('returns document given empty update and versionKey set to false (gh-13783)', async function() {
+    const ExampleModel = db.model('Example', new mongoose.Schema(
+        { id: Number },
+        { versionKey: false }
+      ));
+
+    const doc = await ExampleModel.findOneAndUpdate(
+        { id: 1}, 
+        {}, 
+        { upsert: true, returnDocument: 'after', returnOriginal: false }
+      );
+
+    assert.ok(doc);
+    assert.equal(doc.id, 1);
   });
 });
